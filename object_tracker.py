@@ -37,6 +37,7 @@ flags.DEFINE_float('score', 0.50, 'score threshold')
 flags.DEFINE_boolean('dont_show', False, 'dont show video output')
 flags.DEFINE_boolean('info', False, 'show detailed info of tracked objects')
 flags.DEFINE_boolean('count', False, 'count objects being tracked on screen')
+flags.DEFINE_integer('factor', 1, 'resize images to')
 
 def main(_argv):
     # Definition of the parameters
@@ -87,19 +88,27 @@ def main(_argv):
         width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = int(vid.get(cv2.CAP_PROP_FPS))
+        print('fps_orig ', fps)
+        target_fps=fps/FLAGS.factor
+        print('target_fps ', target_fps)
         codec = cv2.VideoWriter_fourcc(*FLAGS.output_format)
-        out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
+        out = cv2.VideoWriter(FLAGS.output, codec, target_fps, (width, height))
 
     frame_num = 0
     # while video is running
     while True:
         return_value, frame = vid.read()
         if return_value:
-            if vid.get(1) % int(fps*2) == 0:
-              frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-              image = Image.fromarray(frame)
+            # print('fps_orig ', fps_orig)
+            if target_fps > 0:
+                if vid.get(1) % FLAGS.factor == 0:
+                  frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                  image = Image.fromarray(frame)
+                else:
+                  continue
             else:
-              continue
+                print('target_fps is 0')
+                exit()
         else:
             print('Video has ended or failed, try a different video format!')
             break
