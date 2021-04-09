@@ -95,8 +95,11 @@ def main(_argv):
     while True:
         return_value, frame = vid.read()
         if return_value:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(frame)
+            if vid.get(1) % int(fps*2) == 0:
+              frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+              image = Image.fromarray(frame)
+            else:
+              continue
         else:
             print('Video has ended or failed, try a different video format!')
             break
